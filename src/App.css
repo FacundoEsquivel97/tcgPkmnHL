@@ -1,0 +1,30 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.cardContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 50%
+}
+
+.cardImg {
+  width: 200px
+}
+
+.yellowSpan {
+  color: #FFEA00
+}
+
+.price {
+  font-weight: bold;
+  font-size: 30px;
+}
+
+.container {
+  display: flex
+}
