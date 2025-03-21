@@ -8,14 +8,23 @@
 body {
   background-image: url(assets/Background.png);
   margin: 0;
-
 }
 
 .cardContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 50%
+  width: 50%;
+  height: 100%;
+  padding-top: 100px;
+}
+
+.cardContainer.win {
+  background-color: #0DFF0050;
+}
+
+.cardContainer.lose {
+  background-color: #FF000050;
 }
 
 .cardImg {
@@ -34,7 +43,8 @@ body {
 .container {
   display: flex;
   align-items: top;
-  padding-top: 20vh;
+  height: 100%;
+  overflow: hidden
 }
 
 button {
@@ -52,4 +62,26 @@ button:hover {
   background-color: white;
   color: black;
   cursor: pointer;
+}
+
+.scoreContainer {
+  background-color: black;
+  color: white;
+  border: 1px solid white;
+  padding: 10px 25px;
+  border-radius: 100px;
+  margin: 5px 10px;
+  transition: all 0.5s;
+  position: absolute;
+  width: 10vw;
+  top: 40vh;
+  left: 40vw
+}
+
+.scoreContainer.win {
+  background-color: #0DFF00;
+}
+
+.scoreContainer.lose {
+  background-color: #FF0000;
 }
