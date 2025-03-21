@@ -44,6 +44,7 @@ body {
   display: flex;
   align-items: top;
   height: 100%;
+  overflow: auto
 }
 
 button {
@@ -92,7 +93,7 @@ button:hover {
   justify-content: center;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 440px) {
   .container {
     flex-direction: column;
     align-items: center;
@@ -105,6 +106,6 @@ button:hover {
 
   .scoreContainer {
     position: static;
-    min-width: 100px
+    min-width: 100px;
   }
 }
