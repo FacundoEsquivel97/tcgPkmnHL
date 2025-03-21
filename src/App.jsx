@@ -23,7 +23,12 @@ function App() {
   const getSet1 = async () => {
     setLoading1(true);
     try {
-      const res = await fetch("https://api.pokemontcg.io/v2/sets");
+      const res = await fetch("https://api.pokemontcg.io/v2/sets", {
+        headers: {
+          "Authorization": `X-API-Key ${import.meta.env.VITE_API_KEY}`,
+          "Content-Type": "application/json",
+        }
+      });
       const result = await res.json();
       setDataSet1(result.data[Math.floor(Math.random() * (result.count - 0))]);
     } catch (error) {
@@ -34,7 +39,12 @@ function App() {
   const getSet2 = async () => {
     setLoading2(true);
     try {
-      const res = await fetch("https://api.pokemontcg.io/v2/sets");
+      const res = await fetch("https://api.pokemontcg.io/v2/sets", {
+        headers: {
+          "Authorization": `X-API-Key ${import.meta.env.VITE_API_KEY}`,
+          "Content-Type": "application/json",
+        }
+      });
       const result = await res.json();
       setDataSet2(result.data[Math.floor(Math.random() * (result.count - 0))]);
     } catch (error) {
@@ -57,7 +67,12 @@ function App() {
   const getCard1 = async () => {
     try {
       const randomNum = Math.floor(Math.random() * (dataSet1.total - 0) + 1);
-      const res = await fetch(`https://api.pokemontcg.io/v2/cards?q=set.id:${dataSet1.id} number:${randomNum}`);
+      const res = await fetch(`https://api.pokemontcg.io/v2/cards?q=set.id:${dataSet1.id} number:${randomNum}`, {
+        headers: {
+          "Authorization": `X-API-Key ${import.meta.env.VITE_API_KEY}`,
+          "Content-Type": "application/json",
+        }
+      });
       const result = await res.json();
       setDataCard1(result.data[0]);
       setCardPrice1(result ? Object.values(result.data[0].tcgplayer.prices)[0].market : null);
@@ -72,7 +87,12 @@ function App() {
   const getCard2 = async () => {
     try {
       const randomNum = Math.floor(Math.random() * (dataSet2.total - 0) + 1);
-      const res = await fetch(`https://api.pokemontcg.io/v2/cards?q=set.id:${dataSet2.id} number:${randomNum}`);
+      const res = await fetch(`https://api.pokemontcg.io/v2/cards?q=set.id:${dataSet2.id} number:${randomNum}`, {
+        headers: {
+          "Authorization": `X-API-Key ${import.meta.env.VITE_API_KEY}`,
+          "Content-Type": "application/json",
+        }
+      });
       const result = await res.json();
       setDataCard2(result.data[0]);
       setCardPrice2(result ? Object.values(result.data[0].tcgplayer.prices)[0].market : null);
