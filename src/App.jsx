@@ -135,8 +135,10 @@ function App() {
       <div className="container">
         <div className="cardContainer">
           <NewCard cardData={dataCard1} loading={loading1} />
-          {cardPrice1 && !loading1 &&
-            <p className="price">${cardPrice1}</p>}
+          <div className='infoContainer'>
+            {cardPrice1 && !loading1 &&
+              <p className="price">${cardPrice1}</p>}
+          </div>
         </div>
 
         <div className={gameState ? win ? "scoreContainer win" : "scoreContainer lose" :
@@ -145,18 +147,19 @@ function App() {
         </div>
 
         <div className={
-
           gameState ? win ? "cardContainer win" : "cardContainer lose" :
             "cardContainer"
         }>
           <NewCard cardData={dataCard2} loading={loading2} />
-          {cardPrice2 && !loading2 && !loading1 && win &&
-            <>
-              <button onClick={moreExpensive}>Mas cara</button>
-              <button onClick={cheaper}>Mas barata</button>
-            </>}
-          {cardPrice2 && !loading1 && !win && gameState &&
-            <p className="price">${cardPrice2}</p>}
+          <div className='infoContainer'>
+            {cardPrice2 && !loading2 && !loading1 && win &&
+              <>
+                <button onClick={moreExpensive}>Mas cara</button>
+                <button onClick={cheaper}>Mas barata</button>
+              </>}
+            {cardPrice2 && !loading1 && !win && gameState &&
+              <p className="price">${cardPrice2}</p>}
+          </div>
         </div>
       </div>
 

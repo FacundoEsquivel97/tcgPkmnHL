@@ -16,7 +16,7 @@ body {
   align-items: center;
   width: 50%;
   height: 100%;
-  padding-top: 100px;
+  justify-content: center;
 }
 
 .cardContainer.win {
@@ -44,7 +44,6 @@ body {
   display: flex;
   align-items: top;
   height: 100%;
-  overflow: hidden;
 }
 
 button {
@@ -86,11 +85,17 @@ button:hover {
   background-color: #FF0000;
 }
 
+.infoContainer {
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
     align-items: center;
-    overflow: auto
   }
 
   .cardContainer {
