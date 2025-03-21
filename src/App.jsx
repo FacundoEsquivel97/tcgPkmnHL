@@ -138,6 +138,12 @@ function App() {
           {cardPrice1 && !loading1 &&
             <p className="price">${cardPrice1}</p>}
         </div>
+
+        <div className={gameState ? win ? "scoreContainer win" : "scoreContainer lose" :
+          "scoreContainer"}>
+          Puntaje: {score}
+        </div>
+
         <div className={
 
           gameState ? win ? "cardContainer win" : "cardContainer lose" :
@@ -153,10 +159,7 @@ function App() {
             <p className="price">${cardPrice2}</p>}
         </div>
       </div>
-      <div className={gameState ? win ? "scoreContainer win" : "scoreContainer lose" :
-        "scoreContainer"}>
-        Puntaje: {score}
-      </div>
+
     </>
   );
 }

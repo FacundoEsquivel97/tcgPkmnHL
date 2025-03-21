@@ -44,7 +44,7 @@ body {
   display: flex;
   align-items: top;
   height: 100%;
-  overflow: hidden
+  overflow: hidden;
 }
 
 button {
@@ -73,9 +73,9 @@ button:hover {
   margin: 5px 10px;
   transition: all 0.5s;
   position: absolute;
-  width: 10vw;
+  min-width: 100px;
   top: 40vh;
-  left: 40vw
+  left: calc(50vw - 100px)
 }
 
 .scoreContainer.win {
@@ -84,4 +84,22 @@ button:hover {
 
 .scoreContainer.lose {
   background-color: #FF0000;
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    align-items: center;
+    overflow: auto
+  }
+
+  .cardContainer {
+    width: 100%;
+    padding-top: 0px;
+  }
+
+  .scoreContainer {
+    position: static;
+    min-width: 100px
+  }
 }
