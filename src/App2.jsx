@@ -1,232 +1,184 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 import TCGdex from "@tcgdex/sdk";
+import NewCard from './components/NewCard';
 
 function App() {
-    const tcgdex = new TCGdex("es");
-    tcgdex.setCacheTTL(-1);
+  const tcgdex = new TCGdex("es");
+  tcgdex.setCacheTTL(-1);
 
-    const [card1, setCard1] = useState(null);
-    const [card2, setCard2] = useState(null);
+  const [score, setScore] = useState(0);
+  const [dataCard1, setDataCard1] = useState(null);
+  const [dataCard2, setDataCard2] = useState(null);
+  const [cardPrice1, setCardPrice1] = useState(null);
+  const [cardPrice2, setCardPrice2] = useState(null);
+  
+  const [nextCardBuffer, setNextCardBuffer] = useState(null);
 
-    useEffect(() => {
-        const fetchCard = async () => {
-            try {
-                const result1 = await tcgdex.random.card();
-                setCard1(result1);
-            } catch (error) {
-                console.error("Error al obtener carta:", error);
-            }
-        };
+  const [loading1, setLoading1] = useState(false);
+  const [loading2, setLoading2] = useState(false);
+  const [gameState, setGameState] = useState(false);
+  const [win, setWin] = useState(true);
 
-        fetchCard();
-    }, []);
+  const getRandomCard = async () => {
+    try {
+      const res = await fetch("https://api.tcgdex.net/v2/en/categories/Pokemon");
+      const cardsList = await res.json();
 
-    useEffect(() => {
-        const fetchCard = async () => {
-            try {
-                const result2 = await tcgdex.random.card();
-                setCard2(result2);
-            } catch (error) {
-                console.error("Error al obtener carta:", error);
-            }
-        };
+      const randomIndex = Math.floor(Math.random() * cardsList?.cards?.length);
+      const randomCardSummary = cardsList?.cards[randomIndex];
 
-        fetchCard();
-    }, []);
+      const cardRes = await fetch(`https://api.tcgdex.net/v2/en/cards/${randomCardSummary.id}`);
+      const cardData = await cardRes.json();
 
-    console.log('card data 1', card1);
-    console.log('card data 2', card2);
+      const tcgPrices = cardData.pricing?.tcgplayer;
+      let price = tcgPrices?.normal?.marketPrice || tcgPrices?.normal?.midPrice;
 
-    return (
-        <>
-            <div className="container">
-                <div className="cardContainer">
-                    <p>{card1?.rarity} <span className="yellowSpan">30-days average price</span> from www.cardmarket.com {card1?.pricing?.cardmarket?.updated}</p>
-                    <img className="cardImg"
-                        src={card1?.getImageURL('low', 'png')}
-                    />
-                    <div className='infoContainer'>
-                        <p className="price">{card1?.pricing.cardmarket?.avg30} {card1?.pricing.cardmarket?.unit}</p>
-                    </div>
-                </div>
-                <div className="cardContainer">
-                    <p>{card2?.rarity} <span className="yellowSpan">30-days average price</span> from www.cardmarket.com {card2?.pricing?.cardmarket?.updated}</p>
-                    <img className="cardImg"
-                        src={card2?.getImageURL('low', 'png')}
-                    />
-                    <div className='infoContainer'>
-                        <p className="price">{card2?.pricing.cardmarket?.avg30} {card2?.pricing.cardmarket?.unit}</p>
-                    </div>
-                </div>
-            </div>
-        </>
-    );
+      if (!price && tcgPrices) {
+        const variantKeys = Object.keys(tcgPrices).filter(
+          (key) => key !== 'unit' && key !== 'updated'
+        );
+        if (variantKeys.length > 0) {
+          price = tcgPrices[variantKeys[0]]?.marketPrice || tcgPrices[variantKeys[0]]?.midPrice;
+        }
+      }
+
+      if (!price || !cardData.image) {
+        return await getRandomCard();
+      }
+
+      return { cardData, price };
+
+    } catch (error) {
+      console.error("Error al obtener carta aleatoria:", error);
+    }
+  };
+
+  useEffect(() => {
+    startGame();
+  }, []);
+
+  useEffect(() => {
+    !loading2 && gameState && setGameState(false);
+  }, [loading2]);
+
+  const preloadNextCard = async () => {
+    const card = await getRandomCard();
+    setNextCardBuffer(card);
+  };
+
+  const startGame = async () => {
+    setLoading1(true);
+    setLoading2(true);
+    
+    const firstCard = await getRandomCard();
+    const secondCard = await getRandomCard();
+
+    if (firstCard && secondCard) {
+      setDataCard1(firstCard.cardData);
+      setCardPrice1(firstCard.price);
+      setLoading1(false);
+
+      setDataCard2(secondCard.cardData);
+      setCardPrice2(secondCard.price);
+      setLoading2(false);
+
+      preloadNextCard();
+    }
+  };
+
+const advanceToNextCard = async () => {
+  if (nextCardBuffer) {
+    setDataCard2(nextCardBuffer.cardData);
+    setCardPrice2(nextCardBuffer.price);
+    setNextCardBuffer(null);
+    preloadNextCard();
+  } else {
+    setLoading2(true);
+    const nextCard = await getRandomCard();
+    if (nextCard) {
+      setDataCard2(nextCard.cardData);
+      setCardPrice2(nextCard.price);
+      setLoading2(false);
+      preloadNextCard();
+    }
+  }
+};
+
+const handleGuess = async (isMoreExpensive) => {
+  const correct = isMoreExpensive 
+    ? cardPrice2 >= cardPrice1 
+    : cardPrice2 <= cardPrice1;
+
+  if (correct) {
+    setScore(prev => prev + 1);
+    setWin(true);
+    setGameState(true);
+
+    setTimeout(() => {
+      setGameState(false);
+      
+      setDataCard1(dataCard2);
+      setCardPrice1(cardPrice2);
+      setLoading2(true); 
+
+      setTimeout(() => {
+        if (nextCardBuffer) {
+          setDataCard2(nextCardBuffer.cardData);
+          setCardPrice2(nextCardBuffer.price);
+          setNextCardBuffer(null);
+          setLoading2(false);
+          preloadNextCard();
+        } else {
+          advanceToNextCard();
+        }
+      }, 50); 
+
+    }, 600);
+
+  } else {
+    setWin(false);
+    setGameState(true);
+  }
+};
+
+const moreExpensive = () => handleGuess(true);
+const cheaper = () => handleGuess(false);
+
+  return (
+    <>
+      <div className="container">
+        <div className="cardContainer">
+          <NewCard cardData={dataCard1} loading={loading1} />
+          <div className='infoContainer'>
+            {cardPrice1 && !loading1 &&
+              <p className="price">${cardPrice1}</p>}
+          </div>
+        </div>
+
+        <div className={gameState ? win ? "scoreContainer win" : "scoreContainer lose" :
+          "scoreContainer"}>
+          Puntaje: {score}
+        </div>
+
+        <div className={
+          gameState ? win ? "cardContainer win" : "cardContainer lose" :
+            "cardContainer"
+        }>
+          <NewCard cardData={dataCard2} loading={loading2} />
+          <div className='infoContainer'>
+            {cardPrice2 && !loading2 && !loading1 && win &&
+              <>
+                <button onClick={moreExpensive}>Mas cara</button>
+                <button onClick={cheaper}>Mas barata</button>
+              </>}
+            {cardPrice2 && !loading1 && !win && gameState &&
+              <p className="price">${cardPrice2}</p>}
+          </div>
+        </div>
+      </div>
+    </>
+  );
 }
-
-// function App() {
-//   const [dataSet1, setDataSet1] = useState(null);
-//   const [dataSet2, setDataSet2] = useState(null);
-//   const [score, setScore] = useState(0);
-//   const [dataCard1, setDataCard1] = useState(null);
-//   const [dataCard2, setDataCard2] = useState(null);
-//   const [cardPrice1, setCardPrice1] = useState(null);
-//   const [cardPrice2, setCardPrice2] = useState(null);
-//   const [loading1, setLoading1] = useState(false);
-//   const [loading2, setLoading2] = useState(false);
-//   const [gameState, setGameState] = useState(false);
-//   const [win, setWin] = useState(true);
-
-//   useEffect(() => {
-//     getSet1();
-//     getSet2();
-//   }, []);
-
-//   const getSet1 = async () => {
-//     setLoading1(true);
-//     try {
-//       const res = await fetch("https://api.pokemontcg.io/v2/sets", {
-//         headers: {
-//           "Authorization": `X-API-Key ${import.meta.env.VITE_API_KEY}`,
-//           "Content-Type": "application/json",
-//         }
-//       });
-//       const result = await res.json();
-//       setDataSet1(result.data[Math.floor(Math.random() * (result.count - 0))]);
-//     } catch (error) {
-//       console.error("Error al obtener datos del getSet:", error);
-//     }
-//   };
-
-//   const getSet2 = async () => {
-//     setLoading2(true);
-//     try {
-//       const res = await fetch("https://api.pokemontcg.io/v2/sets", {
-//         headers: {
-//           "Authorization": `X-API-Key ${import.meta.env.VITE_API_KEY}`,
-//           "Content-Type": "application/json",
-//         }
-//       });
-//       const result = await res.json();
-//       setDataSet2(result.data[Math.floor(Math.random() * (result.count - 0))]);
-//     } catch (error) {
-//       console.error("Error al obtener datos del getSet:", error);
-//     }
-//   };
-
-//   useEffect(() => {
-//     dataSet1 && getCard1();
-//   }, [dataSet1]);
-
-//   useEffect(() => {
-//     dataSet2 && getCard2();
-//   }, [dataSet2]);
-
-//   useEffect(() => {
-//     !loading2 && gameState && setGameState(false);
-//   }, [loading2]);
-
-//   const getCard1 = async () => {
-//     try {
-//       const randomNum = Math.floor(Math.random() * (dataSet1.total - 0) + 1);
-//       const res = await fetch(`https://api.pokemontcg.io/v2/cards?q=set.id:${dataSet1.id} number:${randomNum}`, {
-//         headers: {
-//           "Authorization": `X-API-Key ${import.meta.env.VITE_API_KEY}`,
-//           "Content-Type": "application/json",
-//         }
-//       });
-//       const result = await res.json();
-//       setDataCard1(result.data[0]);
-//       setCardPrice1(result ? Object.values(result.data[0].tcgplayer.prices)[0].market : null);
-//       setLoading1(false);
-//     } catch (error) {
-//       console.error("Error al obtener datos de getCard:", error);
-//       getSet1();
-//     }
-
-//   };
-
-//   const getCard2 = async () => {
-//     try {
-//       const randomNum = Math.floor(Math.random() * (dataSet2.total - 0) + 1);
-//       const res = await fetch(`https://api.pokemontcg.io/v2/cards?q=set.id:${dataSet2.id} number:${randomNum}`, {
-//         headers: {
-//           "Authorization": `X-API-Key ${import.meta.env.VITE_API_KEY}`,
-//           "Content-Type": "application/json",
-//         }
-//       });
-//       const result = await res.json();
-//       setDataCard2(result.data[0]);
-//       setCardPrice2(result ? Object.values(result.data[0].tcgplayer.prices)[0].market : null);
-//       setLoading2(false);
-//     } catch (error) {
-//       console.error("Error al obtener datos de getCard:", error);
-//       getSet2();
-//     }
-
-//   };
-
-
-//   const moreExpensive = () => {
-//     if (cardPrice1 <= cardPrice2) {
-//       setScore(score + 1);
-//       setWin(true);
-//       setDataCard1(dataCard2);
-//       setCardPrice1(cardPrice2);
-//       getSet2();
-//     } else {
-//       setWin(false);
-//     }
-//     setGameState(true);
-//   };
-
-//   const cheaper = () => {
-//     if (cardPrice1 >= cardPrice2) {
-//       setScore(score + 1);
-//       setDataCard1(dataCard2);
-//       setCardPrice1(cardPrice2);
-//       getSet2();
-//     } else {
-//       setWin(false);
-//     }
-//     setGameState(true);
-//   };
-
-//   return (
-//     <>
-//       <div className="container">
-//         <div className="cardContainer">
-//           <NewCard cardData={dataCard1} loading={loading1} />
-//           <div className='infoContainer'>
-//             {cardPrice1 && !loading1 &&
-//               <p className="price">${cardPrice1}</p>}
-//           </div>
-//         </div>
-
-//         <div className={gameState ? win ? "scoreContainer win" : "scoreContainer lose" :
-//           "scoreContainer"}>
-//           Puntaje: {score}
-//         </div>
-
-//         <div className={
-//           gameState ? win ? "cardContainer win" : "cardContainer lose" :
-//             "cardContainer"
-//         }>
-//           <NewCard cardData={dataCard2} loading={loading2} />
-//           <div className='infoContainer'>
-//             {cardPrice2 && !loading2 && !loading1 && win &&
-//               <>
-//                 <button onClick={moreExpensive}>Mas cara</button>
-//                 <button onClick={cheaper}>Mas barata</button>
-//               </>}
-//             {cardPrice2 && !loading1 && !win && gameState &&
-//               <p className="price">${cardPrice2}</p>}
-//           </div>
-//         </div>
-//       </div>
-
-//     </>
-//   );
-//}
 
 export default App;
