@@ -166,10 +166,11 @@ const cheaper = () => handleGuess(false);
       <div className="container">
         <div className="cardContainer">
           <NewCard cardData={dataCard1} loading={loading1} />
+          {!loading1 &&
           <div className='infoContainer'>
             {cardPrice1 && !loading1 &&
               <p className="price">${cardPrice1}</p>}
-          </div>
+          </div>}
         </div>
 
         <div className={gameState ? win ? "scoreContainer win" : "scoreContainer lose" :
@@ -182,6 +183,7 @@ const cheaper = () => handleGuess(false);
             "cardContainer"
         }>
           <NewCard cardData={dataCard2} loading={loading2} />
+          {!loading2 &&
           <div className='infoContainer'>
             {cardPrice2 && !loading2 && !loading1 && win &&
               <>
@@ -191,6 +193,7 @@ const cheaper = () => handleGuess(false);
             {cardPrice2 && !loading1 && !win && gameState &&
               <p className="price">${cardPrice2}</p>}
           </div>
+}
         </div>
       </div>
       {!win && gameState && (

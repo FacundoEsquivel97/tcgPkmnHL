@@ -10,7 +10,7 @@ function NewCard({ cardData, loading }) {
             {loading && <p>Cargando...</p>}
             {!loading && cardData && (
                 <>
-                    <p>
+                    <p className="rarityText">
                         {rarity}{" "}
                         <span className="yellowSpan">Market price</span> from www.tcgplayer.com ({updatedAt})
                     </p>

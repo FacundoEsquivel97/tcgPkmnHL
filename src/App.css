@@ -8,6 +8,7 @@
 body {
   background-image: url(assets/Background.png);
   margin: 0;
+  overflow: hidden;
 }
 
 .cardContainer {
@@ -43,8 +44,8 @@ body {
 .container {
   display: flex;
   align-items: top;
+  overflow: hidden;
   height: 100%;
-  overflow: auto
 }
 
 button {
@@ -88,6 +89,7 @@ button:hover {
 
 .infoContainer {
   height: 120px;
+  width: 220px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -95,19 +97,44 @@ button:hover {
 
 @media (max-width: 440px) {
   .container {
-    flex-direction: column;
     align-items: center;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .cardContainer {
     width: 100%;
-    padding-top: 0px;
+    flex-direction: row;
+    gap: 16px;
+    height: fit-content;
+    padding: 32px 0px
   }
+
+  .cardContainer p{
+    text-align: center;
+  }
+
 
   .scoreContainer {
     position: static;
     min-width: 100px;
   }
+
+  .cardImg {
+  width: 150px
+}
+
+.infoContainer {
+  width: 160px;
+}
+
+button {
+min-width: 0px;
+}
+
+.rarityText {
+  display: none;
+}
 }
 
 .game-over-overlay {
